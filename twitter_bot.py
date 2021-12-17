@@ -58,7 +58,20 @@ search_bar = chrome_driver.find_element(By.XPATH, '//input[@placeholder="'+"Sear
 search_bar.click()
 search_bar.send_keys("@boonedev_\ue007")
 
-like_buttons = chrome_driver.find_elements(By.XPATH, '//svg[@viewbox="'+"0 0 24 24"+'"]')
+
+like_buttons = chrome_driver.find_elements(By.XPATH, '//div[@data-testid="'+"like"+'"]')
+print(like_buttons)
+for button in like_buttons:
+    coordinates = button.location_once_scrolled_into_view # returns dict of X, Y coordinates
+    chrome_driver.execute_script('window.scrollTo({}, {});'.format(coordinates['x'], coordinates['y']))
+    button.click()
+
+
+
+# print(like_buttons)
+# for button in like_buttons:
+#     print(button)
+#     button.click()
 
 
 # <svg viewBox="0 0 24 24" aria-hidden="true" 
