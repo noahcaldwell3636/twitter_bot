@@ -5,8 +5,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 import requests
 import unittest 
+import time
 
 
 options = webdriver.ChromeOptions()
@@ -58,26 +60,22 @@ search_bar = chrome_driver.find_element(By.XPATH, '//input[@placeholder="'+"Sear
 search_bar.click()
 search_bar.send_keys("@boonedev_\ue007")
 
+html_page = chrome_driver.find_element(By.TAG_NAME, 'html')
 
-like_buttons = chrome_driver.find_elements(By.XPATH, '//div[@data-testid="'+"like"+'"]')
-print(like_buttons)
-for button in like_buttons:
-    coordinates = button.location_once_scrolled_into_view # returns dict of X, Y coordinates
-    chrome_driver.execute_script('window.scrollTo({}, {});'.format(coordinates['x'], coordinates['y']))
-    button.click()
+action = "like"
 
-
-
-# print(like_buttons)
-# for button in like_buttons:
-#     print(button)
-#     button.click()
-
-
-# <svg viewBox="0 0 24 24" aria-hidden="true" 
-# class="r-4qtqp9 r-yyyyoo r-1xvli5t r-dnmrzs r-bnwqim r-1plcrui r-lrvibr r-1hdv0qi">
-# <g><path d="M12 21.638h-.014C9.403 21.59 1.95 14.856 1.95 8.478c0-3.064 2.525-5.754 5.403-5.754
-# 2.29 0 3.83 1.58 4.646 2.73.814-1.148 2.354-2.73 4.645-2.73 2.88 0 5.404 2.69 5.404 5.755 0 6.376-7.454 13.11-10.037
-# 13.157H12zM7.354 4.225c-2.08 0-3.903 1.988-3.903 4.255 0 5.74 7.034 11.596 8.55 11.658 1.518-.062 8.55-5.917 8.55-11.658
-# 0-2.267-1.823-4.255-3.903-4.255-2.528 0-3.94 2.936-3.952 2.965-.23.562-1.156.562-1.387 0-.014-.03-1.425-2.965-3.954-2.965z">
-# </path></g></svg>
+for loop_num in range(20):
+    like_buttons = chrome_driver.find_elements(By.XPATH, '//div[@data-testid="'+action+'"]')
+    for button in like_buttons:
+        #coordinates = button.location_once_scrolled_into_view # returns dict of X, Y coordinates
+        #print(coordinates)
+        #chrome_driver.execute_script('window.scrollTo({}, {});'.format(coordinates['x'], coordinates['y']))
+        try:
+            button.click()
+        except:
+            print("could find the button")
+            pass
+        time.sleep(.2)
+    html_page.send_keys(Keys.END)
+    
+    print(f"\n ending loop number {loop_num} \n")
