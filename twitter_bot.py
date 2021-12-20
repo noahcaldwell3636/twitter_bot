@@ -1,3 +1,4 @@
+# selenium imports
 from selenium import webdriver
 from selenium.common import exceptions
 from selenium.webdriver.common import by
@@ -6,9 +7,30 @@ from selenium.webdriver.support import expected_conditions
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-import requests
-import unittest 
+# other
 import time
+
+#################__SETUP_ENVIRONMENT_VARIABLES#################################
+if __name__ == '__main__':
+    from dotenv import dotenv_values
+    try:
+        config = dotenv_values(".env")
+        USERNAME = config['USERNAME']
+        PHONENUMBER = config['PHONENUMBER']
+        PASSWORD = config['PASSWORD']
+        TARGET_ACCOUNT = config['TARGET_ACCOUNT']
+    except:
+        print("the .env file either does not exist, or does not have"
+            "the USERNAME, PHONENUMBER, PASSWORD, or TARGET_ACCOUNT"
+            "properly assigned.")
+####################END_ENVIRONMENT_VARIABLES_SETUP#############################
+
+
+
+################################################################################
+##########################____FUNCTIONS____#####################################
+################################################################################ 
+
 
 
 def chrome_driver_setup(
@@ -44,21 +66,21 @@ def _press_login():
 def _enter_username():
     username_input = chrome_driver.find_element(By.NAME, "text")
     username_input.click()
-    username_input.send_keys("boonedevart\ue007")
+    username_input.send_keys(USERNAME + Keys.ENTER)
     
 def _enter_phone_number():
     # if prompted, enter phone number
     try:
         username_input = chrome_driver.find_element(By.NAME, "text")
         username_input.click()
-        username_input.send_keys("8048145153\ue007")
+        username_input.send_keys(PHONENUMBER + Keys.ENTER)
     except:
         pass
 
 def _enter_password():
     password_input = chrome_driver.find_element(By.NAME, "password")
     password_input.click()
-    password_input.send_keys("tZNSLcEVHhHj88.\ue007")
+    password_input.send_keys(PASSWORD + Keys.ENTER)
 
 def twitter_login():
     # open twitter 
@@ -68,36 +90,58 @@ def twitter_login():
     _enter_phone_number()
     _enter_password()
 
+def search_target_user():
+    # hit search button (magnify glass icon)
+    explore_button = chrome_driver.find_element(
+        By.XPATH, '//a[@href="'+"/explore"+'"]') 
+    explore_button.click()
+    # search username that you want to give likes to
+    search_bar = chrome_driver.find_element(
+        By.XPATH, '//input[@placeholder="'+"Search Twitter"+'"]')
+    search_bar.click()
+    search_bar.send_keys("@" + TARGET_ACCOUNT + Keys.ENTER)
 
+def like_posts_found():
+    # find buttons on page
+    like_buttons = chrome_driver.find_elements(
+        By.XPATH, '//div[@data-testid="like"]')
+    buttons_found = len(like_buttons)
+    successful_likes = 0
+    # press all found like buttons
+    for button in like_buttons:
+        try:
+            button.click()
+            successful_likes += 1
+        except:
+            # just skip button if it gets lost
+            # or changed so script can continue
+            print("Bot could find the button.")
+            pass
+        # short wait time to prevent errors from
+        # any lag on twitter's webpage
+        time.sleep(.2)
+    print(f"{successful_likes} of {buttons_found}"
+          " were completed.")
+    
+        
+        
+        
+################################################################################
+##########################___END_FUNCTIONS____##################################
+################################################################################
+
+
+
+########################__MAIN_EXECUTION__######################################
 
 if __name__ == '__main__':
     # create selenium chrome object
     chrome_driver = chrome_driver_setup()
     twitter_login()
-
-    explore_button = chrome_driver.find_element(By.XPATH, '//a[@href="'+"/explore"+'"]')
-    explore_button.click()
-
-    search_bar = chrome_driver.find_element(By.XPATH, '//input[@placeholder="'+"Search Twitter"+'"]')
-    search_bar.click()
-    search_bar.send_keys("@boonedev_\ue007")
-
+    search_target_user()
+    # like all unliked posts that show up on the search results
     html_page = chrome_driver.find_element(By.TAG_NAME, 'html')
-
-    action = "like"
-
-    for loop_num in range(20):
-        like_buttons = chrome_driver.find_elements(By.XPATH, '//div[@data-testid="'+action+'"]')
-        for button in like_buttons:
-            #coordinates = button.location_once_scrolled_into_view # returns dict of X, Y coordinates
-            #print(coordinates)
-            #chrome_driver.execute_script('window.scrollTo({}, {});'.format(coordinates['x'], coordinates['y']))
-            try:
-                button.click()
-            except:
-                print("could find the button")
-                pass
-            time.sleep(.2)
-        html_page.send_keys(Keys.END)
-        
-        print(f"\n ending loop number {loop_num} \n")
+    while True:
+        like_posts_found()
+        # move page down to avoid stale element errors
+        #html_page.send_keys(Keys.END)
