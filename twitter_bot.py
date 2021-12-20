@@ -30,32 +30,24 @@ def chrome_driver_setup(
     chrome_driver.implicitly_wait(implicit_wait_time)
     return chrome_driver
 
-def twitter_login():
-    chrome_driver.get("https://www.twitter.com")
+def _press_login():
     try:
         login_button = chrome_driver.find_element(By.LINK_TEXT, 'Log in')
         login_button.click()
     except Exception:
         try:
-            print("trying other button")
             login_button = chrome_driver.find_element(By.LINK_TEXT, 'Sign in')
             login_button.click()
         except:
             pass
-
-if __name__ == '__main__':
-    # create selenium chrome object
-    chrome_driver = chrome_driver_setup()
-    twitter_login()
-    
-    
-    print("step 2")
+        
+def _enter_username():
     username_input = chrome_driver.find_element(By.NAME, "text")
     username_input.click()
     username_input.send_keys("boonedevart\ue007")
-    # next_button = chrome_driver.find_element(By.XPATH, "//span[(@class='css-901oao') and (@class = 'r-qvutc0')]")
-    # next_button.click()
-
+    
+def _enter_phone_number():
+    # if prompted, enter phone number
     try:
         username_input = chrome_driver.find_element(By.NAME, "text")
         username_input.click()
@@ -63,9 +55,25 @@ if __name__ == '__main__':
     except:
         pass
 
+def _enter_password():
     password_input = chrome_driver.find_element(By.NAME, "password")
     password_input.click()
     password_input.send_keys("tZNSLcEVHhHj88.\ue007")
+
+def twitter_login():
+    # open twitter 
+    chrome_driver.get("https://www.twitter.com")
+    _press_login()
+    _enter_username()
+    _enter_phone_number()
+    _enter_password()
+
+
+
+if __name__ == '__main__':
+    # create selenium chrome object
+    chrome_driver = chrome_driver_setup()
+    twitter_login()
 
     explore_button = chrome_driver.find_element(By.XPATH, '//a[@href="'+"/explore"+'"]')
     explore_button.click()
